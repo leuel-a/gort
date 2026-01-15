@@ -22,6 +22,7 @@ var pressStartSource *text.GoTextFaceSource
 var pressStartFace *text.GoTextFace
 
 type Game struct {
+	sortingAlgorithmName       string
 	numbers                    []int
 	i, j                       int
 	frame                      int
@@ -29,6 +30,7 @@ type Game struct {
 	stopVisualization          bool
 	sortingFinished            bool
 	resetButton, controlButton *Button
+	selectInput                *Select
 }
 
 func (game *Game) Reset() {
@@ -49,6 +51,7 @@ func (game *Game) Reset() {
 
 func (game *Game) Update() error {
 	game.frame++
+	game.selectInput.Update()
 
 	if game.resetButton.IsClicked() {
 		game.Reset()
@@ -76,20 +79,7 @@ func (game *Game) Update() error {
 
 	game.frame = 0
 
-	if game.i < len(game.numbers) {
-		if game.j < len(game.numbers)-1 {
-			if game.numbers[game.j] > game.numbers[game.j+1] {
-				game.numbers[game.j], game.numbers[game.j+1] = game.numbers[game.j+1], game.numbers[game.j]
-			}
-			game.j++
-		} else {
-			game.j = 0
-			game.i++
-		}
-	} else {
-		game.sortingFinished = true
-		game.controlButton.Text = "Start"
-	}
+	bubbleSort(game)
 
 	return nil
 }
@@ -110,13 +100,36 @@ func (game *Game) Draw(screen *ebiten.Image) {
 
 	game.resetButton.Draw(screen, color.White)
 	game.controlButton.Draw(screen, color.White)
+	game.selectInput.Draw(screen)
+
+	drawSortingAlgorithmName(screen, game, color.White)
 }
 
 func (game *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return 1920, 1080
 }
 
-func initialize() {
+func initialize(game *Game) {
+	numbers := []int{
+		12, 3, 7, 1, 15, 8, 5, 10, 2, 14,
+		6, 9, 4, 11, 13, 7, 2, 5, 15, 1,
+		8, 6, 3, 12, 14, 9, 11, 10, 13, 4,
+	}
+
+	selectOptions := []string{
+		"Bubble Sort",
+		"Selection Sort",
+	}
+
+	selectInput := &Select{
+		X:             100,
+		Y:             screenHeight - 200,
+		Width:         200,
+		Height:        40,
+		Options:       selectOptions,
+		SelectedIndex: 0,
+	}
+
 	pressStartRegularPath := "assets/fonts/PressStart2P-Regular.ttf"
 	fileBytes, err := os.ReadFile(pressStartRegularPath)
 	if err != nil {
@@ -132,28 +145,25 @@ func initialize() {
 		Source: pressStartSource,
 		Size:   fontSize,
 	}
+
+	game.numbers = numbers
+	game.selectInput = selectInput
+	game.sortingAlgorithmName = "Bubble Sort"
+	game.resetButton = &Button{X: screenWidth - 200, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Reset"}
+	game.controlButton = &Button{X: screenWidth - 320, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Start"}
+	game.i = 0
+	game.j = 0
+	game.speed = 2
+	game.stopVisualization = true
 }
 
 func main() {
-	initialize()
-
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Visualize Sorting Algorithms")
 
-	numbers := []int{
-		12, 3, 7, 1, 15, 8, 5, 10, 2, 14,
-		6, 9, 4, 11, 13, 7, 2, 5, 15, 1,
-		8, 6, 3, 12, 14, 9, 11, 10, 13, 4,
-	}
-	game := &Game{
-		numbers:           numbers,
-		i:                 0,
-		j:                 0,
-		speed:             2,
-		resetButton:       &Button{X: screenWidth - 200, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Reset"},
-		controlButton:     &Button{X: screenWidth - 320, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Start"},
-		stopVisualization: true,
-	}
+	game := &Game{}
+
+	initialize(game)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
