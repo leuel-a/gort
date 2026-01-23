@@ -11,15 +11,20 @@ import (
 )
 
 const (
-	screenWidth     = 1920
-	screenHeight    = 1080
-	rectangleWidth  = 55
-	rectangleHeight = 700
+	baseWidth       = 800
+	baseHeight      = 450
+	rectangleWidth  = 20
+	rectangleHeight = 300
 	fontSize        = 10
 )
 
+// Press Start [Game Like FontFace]
 var pressStartSource *text.GoTextFaceSource
 var pressStartFace *text.GoTextFace
+
+// Poppins FontFace
+var poppinsSource *text.GoTextFaceSource
+var poppinsFace *text.GoTextFace
 
 type Game struct {
 	sortingAlgorithmName       string
@@ -98,15 +103,15 @@ func (game *Game) Draw(screen *ebiten.Image) {
 		VisualizeNumberArray(screen, game.numbers, current, next)
 	}
 
-	game.resetButton.Draw(screen, color.White)
-	game.controlButton.Draw(screen, color.White)
-	game.selectInput.Draw(screen)
+	game.resetButton.Draw(screen, color.White, 10)
+	game.controlButton.Draw(screen, color.White, 10)
+	game.selectInput.Draw(screen, 10)
 
 	drawSortingAlgorithmName(screen, game, color.White)
 }
 
 func (game *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 1920, 1080
+	return baseWidth, baseHeight
 }
 
 func initialize(game *Game) {
@@ -123,20 +128,21 @@ func initialize(game *Game) {
 
 	selectInput := &Select{
 		X:             100,
-		Y:             screenHeight - 200,
-		Width:         200,
-		Height:        40,
+		Y:             baseHeight - 50,
+		Width:         100,
+		Height:        20,
 		Options:       selectOptions,
 		SelectedIndex: 0,
 	}
 
+	// Loading PressStart FontFace
 	pressStartRegularPath := "assets/fonts/PressStart2P-Regular.ttf"
-	fileBytes, err := os.ReadFile(pressStartRegularPath)
+	pressStartFile, err := os.ReadFile(pressStartRegularPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pressStartSource, err = text.NewGoTextFaceSource(bytes.NewReader(fileBytes))
+	pressStartSource, err = text.NewGoTextFaceSource(bytes.NewReader(pressStartFile))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -146,11 +152,28 @@ func initialize(game *Game) {
 		Size:   fontSize,
 	}
 
+	// Loading Poppins Font Face
+	poppinsFilePath := "./assets/fonts/poppins/Poppins-Regular.ttf"
+	poppinsFile, err := os.ReadFile(poppinsFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poppinsSource, err = text.NewGoTextFaceSource(bytes.NewReader(poppinsFile))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poppinsFace = &text.GoTextFace{
+		Size:   fontSize,
+		Source: poppinsSource,
+	}
+
 	game.numbers = numbers
 	game.selectInput = selectInput
 	game.sortingAlgorithmName = "Bubble Sort"
-	game.resetButton = &Button{X: screenWidth - 200, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Reset"}
-	game.controlButton = &Button{X: screenWidth - 320, Y: screenHeight - 100, Width: 100, Height: 50, Text: "Start"}
+	game.resetButton = &Button{X: baseWidth - 200, Y: baseHeight - 50, Width: 100, Height: 20, Text: "Reset"}
+	game.controlButton = &Button{X: baseWidth - 320, Y: baseHeight - 50, Width: 100, Height: 20, Text: "Start"}
 	game.i = 0
 	game.j = 0
 	game.speed = 2
@@ -158,7 +181,7 @@ func initialize(game *Game) {
 }
 
 func main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowSize(baseWidth*2, baseHeight*2)
 	ebiten.SetWindowTitle("Visualize Sorting Algorithms")
 
 	game := &Game{}

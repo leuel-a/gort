@@ -44,11 +44,10 @@ func (s *Select) Update() {
 	s.Open = false
 }
 
-func (s *Select) Draw(screen *ebiten.Image) {
-	selectFontSize := 12.0
+func (s *Select) Draw(screen *ebiten.Image, fontSize float64) {
 	fontFace := &text.GoTextFace{
-		Source: pressStartSource,
-		Size:   selectFontSize,
+		Source: poppinsSource,
+		Size:   fontSize,
 	}
 
 	vector.FillRect(

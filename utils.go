@@ -9,16 +9,16 @@ import (
 
 func drawSortingAlgorithmName(screen *ebiten.Image, game *Game, clr color.Color) {
 	x := 0.0
-	y := 100.0
+	y := 20.0
 
-	nameFontSize := 24.0
+	nameFontSize := 20.0
 	fontFace := &text.GoTextFace{
-		Source: pressStartSource,
+		Source: poppinsSource,
 		Size:   nameFontSize,
 	}
 
 	textW, _ := text.Measure(game.sortingAlgorithmName, fontFace, 0)
-	textX := x + ((float64(screenWidth) - textW) / 2)
+	textX := x + ((float64(baseWidth) - textW) / 2)
 
 	textOptions := &text.DrawOptions{}
 	textOptions.GeoM.Translate(textX, float64(y))

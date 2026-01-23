@@ -14,11 +14,11 @@ type Button struct {
 	WasPressed          bool
 }
 
-func (button *Button) Draw(screen *ebiten.Image, clr color.Color) {
+func (button *Button) Draw(screen *ebiten.Image, clr color.Color, fontSize float64) {
 	vector.FillRect(screen, button.X, button.Y, button.Width, button.Height, clr, true)
 
 	face := &text.GoTextFace{
-		Source: pressStartSource,
+		Source: poppinsSource,
 		Size:   fontSize,
 	}
 
